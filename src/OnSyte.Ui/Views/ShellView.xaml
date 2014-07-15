@@ -42,20 +42,21 @@
     <DockPanel Grid.Row="2">
       <Button x:Name="PerformCrypto"
               DockPanel.Dock="Right"
+              Width="100" Height="27"
               VerticalAlignment="Center"
               Padding="9 3"
               Content="{Binding CryptoMode, Converter={StaticResource CryptoModeToStringConverter}}"/>
       <StackPanel Orientation="Horizontal"
                   HorizontalAlignment="Left">
         <RadioButton VerticalAlignment="Center"
+                     GroupName="CryptoGroup"
                      Content="Encrypt"
-                     IsChecked="{Binding EncryptChecked}"
-                     cal:Message.Attach="[Event Checked] = [Action SetEncryptMode()]"/>
+                     IsChecked="{Binding EncryptChecked}" />
         <RadioButton VerticalAlignment="Center"
+                     GroupName="CryptoGroup"
                      Content="Decrypt"
                      IsChecked="{Binding DecryptChecked}"
-                     Margin="9 0"
-                     cal:Message.Attach="[Event Checked] = [Action SetDecryptMode()]"/>
+                     Margin="9 0" />
       </StackPanel>
     </DockPanel>
   </Grid>

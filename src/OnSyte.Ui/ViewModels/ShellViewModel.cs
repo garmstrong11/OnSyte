@@ -43,21 +43,8 @@
 				if (value == _cryptoMode) return;
 				_cryptoMode = value;
 				NotifyOfPropertyChange();
+				UpdateFiles();
 			}
-		}
-
-		public void SetEncryptMode()
-		{
-			CryptoMode = CryptoMode.Encrypt;
-			EncryptChecked = true;
-			DecryptChecked = false;
-		}
-
-		public void SetDecryptMode()
-		{
-			CryptoMode = CryptoMode.Decrypt;
-			EncryptChecked = false;
-			DecryptChecked = true;
 		}
 
 		public bool EncryptChecked
@@ -68,6 +55,7 @@
 				if (value.Equals(_encryptChecked)) return;
 				_encryptChecked = value;
 				NotifyOfPropertyChange();
+				CryptoMode = value ? CryptoMode.Encrypt : CryptoMode.Decrypt;
 			}
 		}
 
@@ -78,7 +66,8 @@
 			{
 				if (value.Equals(_decryptChecked)) return;
 				_decryptChecked = value;
-				NotifyOfPropertyChange();
+				NotifyOfPropertyChange(); 
+				CryptoMode = value ? CryptoMode.Decrypt : CryptoMode.Encrypt;
 			}
 		}
 
@@ -93,9 +82,9 @@
 			var folderResult = browser.ShowDialog();
 			if (!folderResult.Equals(DialogResult.OK)) return;
 
-			var dir = new DirectoryInfo(browser.SelectedPath);
+			//var dir = new DirectoryInfo(browser.SelectedPath);
 			SourcePath = browser.SelectedPath;
-			Files.AddRange(dir.EnumerateFiles("*.jpg", SearchOption.AllDirectories));
+			UpdateFiles();
 		}
 
 		public string SourcePath
@@ -114,16 +103,34 @@
 			var count = Files.Count - 1;
 
 			for (var i = count; i >= 0; i--) {
-				await _blowfish.EncryptToHmpAsync(Files[i]);
+				switch (CryptoMode) {
+					case CryptoMode.Encrypt:
+						await _blowfish.EncryptToHmpAsync(Files[i]);
+						break;
+					case CryptoMode.Decrypt:
+						await _blowfish.DecryptToJpgAsync(Files[i]);
+						break;
+				}
+
 				Files.Remove(Files[i]);
 				//Files = new BindableCollection<FileInfo>(filesToHandle);
 			}
 		}
 
+		private void UpdateFiles()
+		{
+			if (string.IsNullOrEmpty(SourcePath)) return;
+			Files.Clear();
+			var mask = CryptoMode == CryptoMode.Encrypt ? "*.jpg" : "*.hmp";
+			var dir = new DirectoryInfo(SourcePath);
+
+			Files.AddRange(dir.EnumerateFiles(mask, SearchOption.AllDirectories));
+		}
+
 		protected override void OnActivate()
 		{
 			DisplayName = "OnSyte Crypto";
-			SetEncryptMode();
+			EncryptChecked = true;
 		}
 	}
 }
