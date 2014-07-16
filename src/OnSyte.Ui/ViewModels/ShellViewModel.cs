@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.IO;
+	using System.Linq;
 	using System.Threading.Tasks;
 	using System.Windows.Forms;
 	using Caliburn.Micro;
@@ -13,18 +14,18 @@
 	{
 		private string _sourcePath;
 		private ICryptoProvider _blowfish;
-		private BindableCollection<FileInfo> _files;
+		private BindableCollection<FileItemViewModel> _files;
 		private CryptoMode _cryptoMode;
 		private bool _encryptChecked;
 		private bool _decryptChecked;
 
 		public ShellViewModel(ICryptoProvider blowfish)
 		{
-			Files = new BindableCollection<FileInfo>();
+			Files = new BindableCollection<FileItemViewModel>();
 			_blowfish = blowfish;
 		}
 
-		public BindableCollection<FileInfo> Files	
+		public BindableCollection<FileItemViewModel> Files	
 		{
 			get { return _files; }
 			set
@@ -100,20 +101,42 @@
 
 		public async Task PerformCrypto()
 		{
-			var count = Files.Count - 1;
+			//var count = Files.Count - 1;
 
-			for (var i = count; i >= 0; i--) {
+			foreach (var file in Files.Where(f => f.Selected)) {
 				switch (CryptoMode) {
 					case CryptoMode.Encrypt:
-						await _blowfish.EncryptToHmpAsync(Files[i]);
+						await _blowfish.EncryptToHmpAsync(file.FileInfo);
 						break;
 					case CryptoMode.Decrypt:
-						await _blowfish.DecryptToJpgAsync(Files[i]);
+						await _blowfish.DecryptToJpgAsync(file.FileInfo);
 						break;
 				}
 
-				Files.Remove(Files[i]);
+				file.Selected = false;
+				//Files.Remove(Files[i]);
 				//Files = new BindableCollection<FileInfo>(filesToHandle);
+			}
+		}
+
+		public void DeselectAll()
+		{
+			foreach (var file in Files) {
+				file.Selected = false;
+			}
+		}
+
+		public void InvertSelection()
+		{
+			foreach (var file in Files) {
+				file.Selected = !file.Selected;
+			}
+		}
+
+		public void SelectAll()
+		{
+			foreach (var file in Files) {
+				file.Selected = true;
 			}
 		}
 
@@ -124,7 +147,9 @@
 			var mask = CryptoMode == CryptoMode.Encrypt ? "*.jpg" : "*.hmp";
 			var dir = new DirectoryInfo(SourcePath);
 
-			Files.AddRange(dir.EnumerateFiles(mask, SearchOption.AllDirectories));
+			var viewModels = dir.EnumerateFiles(mask, SearchOption.AllDirectories)
+				.Select(v => new FileItemViewModel(v));
+			Files.AddRange(viewModels);
 		}
 
 		protected override void OnActivate()
