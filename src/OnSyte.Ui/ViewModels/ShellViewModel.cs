@@ -104,12 +104,13 @@
 			//var count = Files.Count - 1;
 
 			foreach (var file in Files.Where(f => f.Selected)) {
+				var info = new FileInfo(file.FilePath);
 				switch (CryptoMode) {
 					case CryptoMode.Encrypt:
-						await _blowfish.EncryptToHmpAsync(file.FileInfo);
+						await _blowfish.EncryptToHmpAsync(info);
 						break;
 					case CryptoMode.Decrypt:
-						await _blowfish.DecryptToJpgAsync(file.FileInfo);
+						await _blowfish.DecryptToJpgAsync(info);
 						break;
 				}
 
@@ -148,7 +149,7 @@
 			var dir = new DirectoryInfo(SourcePath);
 
 			var viewModels = dir.EnumerateFiles(mask, SearchOption.AllDirectories)
-				.Select(v => new FileItemViewModel(v));
+				.Select(v => new FileItemViewModel(v.FullName));
 			Files.AddRange(viewModels);
 		}
 

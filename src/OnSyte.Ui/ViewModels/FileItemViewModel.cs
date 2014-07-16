@@ -5,23 +5,23 @@
 
 	public class FileItemViewModel : PropertyChangedBase
 	{
-		private readonly FileInfo _fileInfo;
+		private readonly string _path;
 		private bool _selected;
 
-		public FileItemViewModel(FileInfo fileInfo)
+		public FileItemViewModel(string path)
 		{
-			_fileInfo = fileInfo;
+			_path = path;
 			Selected = true;
 		}
 
 		public string FileName
 		{
-			get { return _fileInfo.Name; }
+			get { return Path.GetFileName(_path); }
 		}
 
-		public FileInfo FileInfo
+		public string FilePath
 		{
-			get { return _fileInfo; }
+			get { return _path; }
 		}
 
 		public bool Selected
