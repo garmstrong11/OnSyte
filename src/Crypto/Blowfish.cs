@@ -371,13 +371,15 @@ namespace Crypto
 			xr = Xr;
 		}
 
-		public async Task EncryptToHmpAsync(FileInfo fileInfo)
+		public async Task EncryptToHmpAsync(FileInfo sourceFile, string destinationPath)
 		{
-			var hmpPath = fileInfo.FullName.Replace(".jpg", ".hmp");
-			byte[] imageData;
-			var originalFileLength = Convert.ToInt32(fileInfo.Length);
+			var hmpFileName = sourceFile.Name.Replace(".jpg", ".hmp");
+			var hmpPath = Path.Combine(destinationPath, hmpFileName);
 
-			using (var s = new FileStream(fileInfo.FullName, FileMode.Open))
+			byte[] imageData;
+			var originalFileLength = Convert.ToInt32(sourceFile.Length);
+
+			using (var s = new FileStream(sourceFile.FullName, FileMode.Open))
 			{
 				using (var m = new MemoryStream())
 				{
@@ -415,16 +417,17 @@ namespace Crypto
 			return src;
 		}
 
-		public async Task DecryptToJpgAsync(FileInfo fileInfo)
+		public async Task DecryptToJpgAsync(FileInfo sourceFile, string destinationPath)
 		{
-			var jpgPath = fileInfo.FullName.Replace(".hmp", ".jpg");
+			var jpgFileName = sourceFile.Name.Replace(".hmp", ".jpg");
+			var jpgPath = Path.Combine(destinationPath, jpgFileName);
 
-			var len = Convert.ToInt32(fileInfo.Length);
+			var len = Convert.ToInt32(sourceFile.Length);
 
 			int unpaddedImageLength;
 			byte[] paddedImageData;
 
-			using (var s = new FileStream(fileInfo.FullName, FileMode.Open))
+			using (var s = new FileStream(sourceFile.FullName, FileMode.Open))
 			{
 				using (var m = new MemoryStream())
 				{

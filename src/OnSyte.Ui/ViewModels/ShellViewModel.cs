@@ -1,6 +1,7 @@
 ﻿namespace OnSyte.Ui.ViewModels
 {
 	using System;
+	using System.Collections;
 	using System.IO;
 	using System.Linq;
 	using System.Threading.Tasks;
@@ -13,11 +14,13 @@
 	public class ShellViewModel : Screen, IShell
 	{
 		private string _sourcePath;
-		private ICryptoProvider _blowfish;
+		private readonly ICryptoProvider _blowfish;
 		private BindableCollection<FileItemViewModel> _files;
 		private CryptoMode _cryptoMode;
 		private bool _encryptChecked;
 		private bool _decryptChecked;
+		private string _destinationPath;
+		private bool _hasSelection;
 
 		public ShellViewModel(ICryptoProvider blowfish)
 		{
@@ -72,7 +75,7 @@
 			}
 		}
 
-		public void BrowseFolderAsync()
+		public void BrowseSourceFolder()
 		{
 			var browser = new FolderBrowserDialog
 				{
@@ -83,9 +86,24 @@
 			var folderResult = browser.ShowDialog();
 			if (!folderResult.Equals(DialogResult.OK)) return;
 
-			//var dir = new DirectoryInfo(browser.SelectedPath);
 			SourcePath = browser.SelectedPath;
-			UpdateFiles();
+			if (string.IsNullOrEmpty(DestinationPath)) {
+				DestinationPath = SourcePath;
+			}
+		}
+
+		public void BrowseDestinationFolder()
+		{
+			var browser = new FolderBrowserDialog
+			{
+				RootFolder = Environment.SpecialFolder.Desktop,
+				SelectedPath = @"\\Nasdee\Ryan\HortRoot\Lowes\L36 TagXpress\jpg"
+			};
+
+			var folderResult = browser.ShowDialog();
+			if (!folderResult.Equals(DialogResult.OK)) return;
+
+			DestinationPath = browser.SelectedPath;
 		}
 
 		public string SourcePath
@@ -96,49 +114,53 @@
 				if (value == _sourcePath) return;
 				_sourcePath = value;
 				NotifyOfPropertyChange();
+				DestinationPath = _sourcePath;
+				UpdateFiles();
 			}
 		}
 
-		public async Task PerformCrypto()
+		public string DestinationPath
 		{
-			//var count = Files.Count - 1;
+			get { return _destinationPath; }
+			set
+			{
+				if (value == _destinationPath) return;
+				_destinationPath = value;
+				NotifyOfPropertyChange(() => DestinationPath);
+			}
+		}
 
-			foreach (var file in Files.Where(f => f.Selected)) {
-				var info = new FileInfo(file.FilePath);
-				switch (CryptoMode) {
+		public async Task PerformCrypto(IList selectedItems)
+		{
+			foreach (var file in selectedItems)
+			{
+				var info = new FileInfo(((FileItemViewModel)file).FilePath);
+				switch (CryptoMode)
+				{
 					case CryptoMode.Encrypt:
-						await _blowfish.EncryptToHmpAsync(info);
+						await _blowfish.EncryptToHmpAsync(info, DestinationPath);
 						break;
 					case CryptoMode.Decrypt:
-						await _blowfish.DecryptToJpgAsync(info);
+						await _blowfish.DecryptToJpgAsync(info, DestinationPath);
 						break;
 				}
-
-				file.Selected = false;
-				//Files.Remove(Files[i]);
-				//Files = new BindableCollection<FileInfo>(filesToHandle);
 			}
 		}
 
-		public void DeselectAll()
+		public bool HasSelection
 		{
-			foreach (var file in Files) {
-				file.Selected = false;
+			get { return _hasSelection; }
+			set
+			{
+				if (value.Equals(_hasSelection)) return;
+				_hasSelection = value;
+				NotifyOfPropertyChange(() => HasSelection);
 			}
 		}
 
-		public void InvertSelection()
+		public void MonitorSelection(IList selectedItems)
 		{
-			foreach (var file in Files) {
-				file.Selected = !file.Selected;
-			}
-		}
-
-		public void SelectAll()
-		{
-			foreach (var file in Files) {
-				file.Selected = true;
-			}
+			HasSelection = selectedItems.Count > 0;
 		}
 
 		private void UpdateFiles()

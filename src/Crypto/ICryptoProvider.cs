@@ -5,7 +5,7 @@
 
 	public interface ICryptoProvider
 	{
-		Task EncryptToHmpAsync(FileInfo fileInfo);
-		Task DecryptToJpgAsync(FileInfo fileInfo);
+		Task EncryptToHmpAsync(FileInfo sourceFile, string destinationPath);
+		Task DecryptToJpgAsync(FileInfo sourceFile, string destinationPath);
 	}
 }
