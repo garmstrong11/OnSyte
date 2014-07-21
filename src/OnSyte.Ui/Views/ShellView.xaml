@@ -24,7 +24,8 @@
               Margin="9 0 0 0"
               Padding="9 0"
               DockPanel.Dock="Right"/>
-        <TextBox x:Name="SourcePath" />
+        <TextBox x:Name="SourcePath"
+                 cal:Message.Attach="[Event PreviewDragOver] = [Action HandleFolderDrag($eventArgs)];[Event PreviewDrop] = [Action HandleFolderDrop($executionContext]"/>
       </DockPanel>
       <Label Content="Destination Folder"
              Padding="0 9 0 0"/>
@@ -34,7 +35,8 @@
               Margin="9 0 0 0"
               Padding="9 0"
               DockPanel.Dock="Right"/>
-        <TextBox x:Name="DestinationPath"/>
+        <TextBox x:Name="DestinationPath"
+                 cal:Message.Attach="[Event PreviewDragOver] = [Action HandleFolderDrag($eventArgs)];[Event PreviewDrop] = [Action HandleFolderDrop($executionContext]"/>
       </DockPanel>
     </StackPanel>
 

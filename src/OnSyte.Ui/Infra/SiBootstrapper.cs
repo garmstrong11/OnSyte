@@ -25,6 +25,7 @@
 
 			_container.Register<IWindowManager, WindowManager>();
 			_container.Register<IShell, ShellViewModel>();
+			_container.Register<IProgressViewModel, ProgressViewModel>();
 			_container.RegisterSingle<IEventAggregator, EventAggregator>();
 			_container.RegisterSingle<ICryptoProvider>(new Blowfish(Settings.Default.BlowfishKey));
 

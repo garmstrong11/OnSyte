@@ -7,25 +7,26 @@
 	using System.Threading.Tasks;
 	using System.Windows.Forms;
 	using Caliburn.Micro;
-	using Crypto;
 	using Infra;
 	using Screen = Caliburn.Micro.Screen;
 
 	public class ShellViewModel : Screen, IShell
 	{
 		private string _sourcePath;
-		private readonly ICryptoProvider _blowfish;
 		private BindableCollection<FileItemViewModel> _files;
 		private CryptoMode _cryptoMode;
 		private bool _encryptChecked;
 		private bool _decryptChecked;
 		private string _destinationPath;
 		private bool _hasSelection;
+		private readonly IProgressViewModel _progressViewModel;
+		private readonly IWindowManager _windowManager;
 
-		public ShellViewModel(ICryptoProvider blowfish)
+		public ShellViewModel(IProgressViewModel progressViewModel, IWindowManager windowManager)
 		{
+			_progressViewModel = progressViewModel;
+			_windowManager = windowManager;
 			Files = new BindableCollection<FileItemViewModel>();
-			_blowfish = blowfish;
 		}
 
 		public BindableCollection<FileItemViewModel> Files	
@@ -130,21 +131,48 @@
 			}
 		}
 
-		public async Task PerformCrypto(IList selectedItems)
+		public void HandleFolderDrag(object evtArgs)
 		{
-			foreach (var file in selectedItems)
-			{
-				var info = new FileInfo(((FileItemViewModel)file).FilePath);
-				switch (CryptoMode)
-				{
-					case CryptoMode.Encrypt:
-						await _blowfish.EncryptToHmpAsync(info, DestinationPath);
-						break;
-					case CryptoMode.Decrypt:
-						await _blowfish.DecryptToJpgAsync(info, DestinationPath);
-						break;
-				}
+			var args = (System.Windows.DragEventArgs) evtArgs;
+
+			var folderPaths = (string[])args.Data.GetData(DataFormats.FileDrop);
+			var info =  new FileInfo(folderPaths[0]);
+
+			if (!info.IsDirectory()) return;
+
+			args.Effects = System.Windows.DragDropEffects.Link;
+			args.Handled = true;
+		}
+
+		public void HandleFolderDrop(ActionExecutionContext ctx)
+		{
+			var args = (System.Windows.DragEventArgs)ctx.EventArgs;
+			var boxName = ctx.Source.Name;
+			var folderPaths = (string[])args.Data.GetData(DataFormats.FileDrop);
+			var info = new FileInfo(folderPaths[0]);
+
+			if (!info.IsDirectory()) return;
+
+			args.Effects = System.Windows.DragDropEffects.Link;
+
+			if (boxName == "DestinationPath") {
+				DestinationPath = folderPaths[0];
 			}
+			else {
+				SourcePath = folderPaths[0];
+			}
+			args.Handled = true;
+		}
+
+		public void PerformCrypto(IList selectedItems)
+		{
+			_progressViewModel.Items = selectedItems;
+			_progressViewModel.CryptoMode = CryptoMode;
+			_progressViewModel.DestinationPath = DestinationPath;
+			_progressViewModel.Progress = 0;
+			_progressViewModel.CurrentFilename = "";
+
+			_windowManager.ShowDialog(_progressViewModel);
 		}
 
 		public bool HasSelection

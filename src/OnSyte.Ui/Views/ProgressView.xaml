@@ -1,0 +1,21 @@
+﻿<UserControl x:Class="OnSyte.Ui.Views.ProgressView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="100" d:DesignWidth="400"
+             Background="White">
+    <Grid Margin="9" Width="400" Height="100">
+      <Grid.RowDefinitions>
+        <RowDefinition />
+        <RowDefinition />
+      </Grid.RowDefinitions>
+      <ProgressBar Height="24"
+                   Minimum="0"
+                   Maximum="{Binding FileCount}"
+                   Value="{Binding Progress}"/>
+      <TextBlock x:Name="CurrentFilename"
+                 Grid.Row="1"/>
+    </Grid>
+</UserControl>
