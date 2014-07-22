@@ -2,12 +2,16 @@
 {
 	using System;
 	using System.Collections;
+	using System.Dynamic;
 	using System.IO;
 	using System.Linq;
 	using System.Threading.Tasks;
+	using System.Windows;
+	using System.Windows.Controls.Primitives;
 	using System.Windows.Forms;
 	using Caliburn.Micro;
 	using Infra;
+	using DataFormats = System.Windows.Forms.DataFormats;
 	using Screen = Caliburn.Micro.Screen;
 
 	public class ShellViewModel : Screen, IShell
@@ -201,6 +205,16 @@
 			var viewModels = dir.EnumerateFiles(mask, SearchOption.AllDirectories)
 				.Select(v => new FileItemViewModel(v.FullName));
 			Files.AddRange(viewModels);
+
+			dynamic settings = new ExpandoObject();
+
+			settings.StaysOpen = false;
+			settings.PlacementTarget = GetView();
+			settings.Placement = PlacementMode.Center;
+			_windowManager.ShowPopup(
+				new FileCountNotifierViewModel(string.Format("{0} Files found.", Files.Count)),
+				null,
+				settings);
 		}
 
 		protected override void OnActivate()

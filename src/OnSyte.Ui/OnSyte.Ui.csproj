@@ -78,11 +78,15 @@
     <Compile Include="Infra\CryptoMode.cs" />
     <Compile Include="Infra\Extensions.cs" />
     <Compile Include="Infra\SiBootstrapper.cs" />
+    <Compile Include="ViewModels\FileCountNotifierViewModel.cs" />
     <Compile Include="ViewModels\IProgressViewModel.cs" />
     <Compile Include="ViewModels\ProgressViewModel.cs" />
     <Compile Include="ViewModels\FileItemViewModel.cs" />
     <Compile Include="ViewModels\IShell.cs" />
     <Compile Include="ViewModels\ShellViewModel.cs" />
+    <Compile Include="Views\FileCountNotifierView.xaml.cs">
+      <DependentUpon>FileCountNotifierView.xaml</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">
@@ -119,6 +123,10 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Page Include="Views\FileCountNotifierView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\ProgressView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
